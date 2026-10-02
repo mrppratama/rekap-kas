@@ -74,6 +74,11 @@
   const APP_BUILD_DATE = '02 Oktober 2026';
   const APP_CHANGELOG = [
     {
+      badge: 'Desain Minimalis',
+      title: 'Penyederhanaan Header Modal Dialog',
+      desc: 'Menghilangkan tombol silang (X) di pojok atas seluruh popup dialog dan modal. Penutupan kini terpusat lebih intuitif dan bersih melalui tombol aksi Batal / Tutup di bagian bawah baik pada Desktop maupun Mobile.'
+    },
+    {
       badge: 'UI Presisi',
       title: 'Perbaikan Posisi Dropdown',
       desc: 'Menu pilihan dropdown pada form pengeluaran, pembayaran kas, filter periode, dan setting sekarang menempel rapi tepat di bawah kolom pilihan tanpa melayang ke bawah.'

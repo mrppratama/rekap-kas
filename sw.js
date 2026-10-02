@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rekap-kas-v10';
+const CACHE_NAME = 'rekap-kas-v11';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
