@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Setiap user hanya bisa akses data miliknya sendiri
+    // Path: /users/{userId}/{collection}/{document}
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Blokir akses langsung ke root (tanpa autentikasi)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekap Kas - Aplikasi Pencatatan Kas Kelas</title>
+  <meta name="description" content="Aplikasi Rekap Kas Kelas berbasis Firebase, HTML, CSS, dan Vanilla JS yang ringan dan mudah digunakan.">
+  <meta name="theme-color" content="#215E61">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rekap Kas">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="shortcut icon" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261002_v13">
+  <link rel="stylesheet" href="login.css?v=20261002_v13">
+</head>
+
+<body>
+  <div id="app" class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <span class="logo-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+              <path d="M6 15h2" />
+              <path d="M12 15h6" />
+            </svg></span>
+          <div class="brand-text">
+            <h1 class="brand-title">Rekap Kas</h1>
+            <span class="brand-subtitle" id="sidebar-class-badge">Memuat...</span>
+          </div>
+        </div>
+        <button class="btn-icon mobile-toggle" id="sidebar-close-btn" aria-label="Tutup Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <ul>
+          <li>
+            <a href="#dashboard" class="nav-link active" data-view="dashboard">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="7" height="9" rx="1" />
+                  <rect x="14" y="3" width="7" height="5" rx="1" />
+                  <rect x="14" y="12" width="7" height="9" rx="1" />
+                  <rect x="3" y="16" width="7" height="5" rx="1" />
+                </svg></span>
+              <span class="nav-label">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#pemasukan" class="nav-link" data-view="pemasukan">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v8" />
+                  <path d="M8 12l4 4 4-4" />
+                </svg></span>
+              <span class="nav-label">Pemasukan</span>
+            </a>
+          </li>
+          <li>
+            <a href="#pengeluaran" class="nav-link" data-view="pengeluaran">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16V8" />
+                  <path d="M8 12l4-4 4 4" />
+                </svg></span>
+              <span class="nav-label">Pengeluaran</span>
+            </a>
+          </li>
+          <li>
+            <a href="#siswa" class="nav-link" data-view="siswa">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg></span>
+              <span class="nav-label">Data Siswa</span>
+            </a>
+          </li>
+          <li>
+            <a href="#periode" class="nav-link" data-view="periode">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg></span>
+              <span class="nav-label">Periode</span>
+            </a>
+          </li>
+          <li>
+            <a href="#cetak" class="nav-link" data-view="cetak">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg></span>
+              <span class="nav-label">Cetak Laporan</span>
+            </a>
+          </li>
+          <li>
+            <a href="#pengaturan" class="nav-link" data-view="pengaturan">
+              <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg></span>
+              <span class="nav-label">Pengaturan</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <!-- Install PWA Button (Sidebar Option) -->
+        <button class="sidebar-install-pwa-btn" id="btn-sidebar-install-pwa" onclick="triggerPwaInstall()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Install Aplikasi PWA</span>
+        </button>
+
+        <!-- Akun & Opsi Logout (Bawah Kiri Sidebar) -->
+        <div class="sidebar-user-card" id="sidebar-user-card">
+          <div class="sidebar-user-avatar" id="sidebar-user-avatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="sidebar-user-name">Akun Kas</div>
+            <div class="sidebar-user-role">Administrator</div>
+          </div>
+          <button class="sidebar-logout-btn" id="btn-sidebar-logout" title="Keluar" aria-label="Keluar dari akun">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+
+        <!-- Version & Changelog Button (Klik untuk buka Changelog) -->
+        <button type="button" class="sidebar-version-badge" id="btn-sidebar-version" title="Klik untuk melihat catatan pembaruan">
+          <span class="version-dot"></span>
+          <span class="version-tag">v2.4.0</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Header Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="btn-icon mobile-menu-btn" id="mobile-menu-btn" aria-label="Buka Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <div>
+            <h2 class="view-title" id="current-view-title">Dashboard</h2>
+            <p class="view-subtitle" id="current-view-subtitle">Ringkasan transaksi dan rekap kas kelas</p>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <div class="header-info-pill" id="header-info-pill">
+            <span class="pill-label">Kelas:</span>
+            <strong id="header-class-name">-</strong>
+            <span class="pill-divider">&bull;</span>
+            <span class="pill-label">Tahun:</span>
+            <strong id="header-academic-year">-</strong>
+          </div>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="content-body">
+        <!-- 1. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view-panel active">
+          <!-- Filter Bar -->
+          <div class="card filter-card">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label for="filter-dashboard-year">Tahun:</label>
+                <select id="filter-dashboard-year" class="form-control form-control-sm">
+                  <option value="ALL">Semua Tahun</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="filter-dashboard-period">Periode:</label>
+                <select id="filter-dashboard-period" class="form-control form-control-sm">
+                  <option value="ALL">Semua Periode</option>
+                </select>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-reset-dashboard-filter">Reset Filter</button>
+            </div>
+          </div>
+
+          <!-- Stat Cards Grid -->
+          <div class="stat-grid">
+            <div class="stat-card stat-saldo">
+              <div class="stat-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                  <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                  <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                </svg></div>
+              <div class="stat-content">
+                <span class="stat-label">SALDO SAAT INI</span>
+                <h3 class="stat-value" id="stat-current-balance">Rp0</h3>
+                <span class="stat-helper">Saldo Awal + Total Masuk - Total Keluar</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-pemasukan">
+              <div class="stat-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg></div>
+              <div class="stat-content">
+                <span class="stat-label">TOTAL PEMASUKAN</span>
+                <h3 class="stat-value" id="stat-total-income">Rp0</h3>
+                <span class="stat-helper" id="stat-income-count">0 Transaksi Kas</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-pengeluaran">
+              <div class="stat-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                  <polyline points="17 18 23 18 23 12" />
+                </svg></div>
+              <div class="stat-content">
+                <span class="stat-label">TOTAL PENGELUARAN</span>
+                <h3 class="stat-value" id="stat-total-expense">Rp0</h3>
+                <span class="stat-helper" id="stat-expense-count">0 Transaksi Pengeluaran</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-siswa">
+              <div class="stat-icon-wrapper"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg></div>
+              <div class="stat-content">
+                <span class="stat-label">SISWA AKTIF</span>
+                <h3 class="stat-value" id="stat-active-students">0</h3>
+                <span class="stat-helper" id="stat-total-students">Total 0 Siswa Terdaftar</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Rekap Global Section -->
+          <div class="card mt-4">
+            <div class="card-header flex-between">
+              <div>
+                <h3 class="card-title">REKAP GLOBAL PER BULAN</h3>
+                <p class="card-subtitle">Perhitungan saldo bergulir otomatis per periode kas</p>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-outline btn-sm" id="btn-quick-print-global">Cetak Rekap Global</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" id="table-rekap-global">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;" class="text-center">No</th>
+                    <th>Bulan / Periode</th>
+                    <th class="text-right">Saldo Awal</th>
+                    <th class="text-right">Pemasukan</th>
+                    <th class="text-right">Pengeluaran</th>
+                    <th class="text-right">Saldo Akhir</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rekap-global">
+                  <!-- Generated dynamically via JS -->
+                </tbody>
+                <tfoot>
+                  <tr class="table-total-row">
+                    <td colspan="2" class="text-center font-bold">TOTAL KESELURUHAN</td>
+                    <td class="text-right font-bold" id="global-total-initial-balance">-</td>
+                    <td class="text-right font-bold text-success" id="global-total-income">Rp0</td>
+                    <td class="text-right font-bold text-danger" id="global-total-expense">Rp0</td>
+                    <td class="text-right font-bold text-primary" id="global-final-balance">Rp0</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div id="empty-state-global" class="empty-state hidden">
+              <p>Belum ada periode atau transaksi untuk ditampilkan.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PEMASUKAN VIEW (Matrix Siswa x Periode) -->
+        <section id="view-pemasukan" class="view-panel">
+          <div class="card mb-3">
+            <div class="toolbar-wrapper">
+              <div class="search-box">
+                <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg></span>
+                <input type="text" id="search-pemasukan-nama" class="form-control" placeholder="Cari nama siswa...">
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label for="filter-pemasukan-tahun">Tahun:</label>
+                  <select id="filter-pemasukan-tahun" class="form-control form-control-sm">
+                    <option value="ALL">Semua Tahun</option>
+                  </select>
+                </div>
+                <div class="filter-group">
+                  <label for="filter-pemasukan-status">Status:</label>
+                  <select id="filter-pemasukan-status" class="form-control form-control-sm">
+                    <option value="ALL">Semua Status</option>
+                    <option value="Lunas">Lunas</option>
+                    <option value="Belum Lunas">Belum Lunas</option>
+                    <option value="BOYONG">BOYONG</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-reset-pemasukan-filter">Reset</button>
+              </div>
+            </div>
+            <div class="notice-box mt-2">
+              <strong>Tips:</strong> Klik langsung pada kotak/sel pembayaran siswa untuk menambah, melihat, mengedit,
+              atau menghapus data kas.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex-between">
+              <div>
+                <h3 class="card-title">TABEL REKAP PEMASUKAN KAS (MATRIKS)</h3>
+                <p class="card-subtitle">Format tabel matriks siswa dan periode pembayaran</p>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-primary btn-sm" id="btn-quick-print-pemasukan">Cetak Rekap Pemasukan</button>
+              </div>
+            </div>
+
+            <!-- Horizontal scroll matrix table container -->
+            <div class="table-responsive matrix-container" id="pemasukan-matrix-wrapper">
+              <table class="table table-bordered table-matrix" id="table-matrix-pemasukan">
+                <thead id="thead-matrix-pemasukan">
+                  <!-- Dynamic headers generated via JS -->
+                </thead>
+                <tbody id="tbody-matrix-pemasukan">
+                  <!-- Dynamic student rows generated via JS -->
+                </tbody>
+                <tfoot id="tfoot-matrix-pemasukan">
+                  <!-- Dynamic column totals generated via JS -->
+                </tfoot>
+              </table>
+            </div>
+
+            <div id="empty-state-pemasukan" class="empty-state hidden">
+              <p>Belum ada data siswa atau periode yang aktif.</p>
+              <div class="mt-2">
+                <a href="#siswa" class="btn btn-primary btn-sm nav-link" data-view="siswa">+ Tambah Data Siswa</a>
+                <a href="#periode" class="btn btn-secondary btn-sm nav-link ml-2" data-view="periode">+ Tambah
+                  Periode</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. PENGELUARAN VIEW -->
+        <section id="view-pengeluaran" class="view-panel">
+          <div class="card mb-3">
+            <div class="toolbar-wrapper flex-between">
+              <div class="search-box">
+                <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg></span>
+                <input type="text" id="search-pengeluaran" class="form-control"
+                  placeholder="Cari keterangan atau kategori...">
+              </div>
+              <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-open-modal-tambah-pengeluaran">+ Tambah Pengeluaran</button>
+              </div>
+            </div>
+            <div class="filter-row mt-3">
+              <div class="filter-group">
+                <label for="filter-pengeluaran-tahun">Tahun:</label>
+                <select id="filter-pengeluaran-tahun" class="form-control form-control-sm">
+                  <option value="ALL">Semua Tahun</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="filter-pengeluaran-periode">Periode:</label>
+                <select id="filter-pengeluaran-periode" class="form-control form-control-sm">
+                  <option value="ALL">Semua Periode</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="filter-pengeluaran-kategori">Kategori:</label>
+                <select id="filter-pengeluaran-kategori" class="form-control form-control-sm">
+                  <option value="ALL">Semua Kategori</option>
+                </select>
+              </div>
+              <button class="btn btn-secondary btn-sm" id="btn-reset-pengeluaran-filter">Reset</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex-between">
+              <div>
+                <h3 class="card-title">DAFTAR REKAP PENGELUARAN KAS</h3>
+                <p class="card-subtitle">Semua catatan pengeluaran kas kelas</p>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-outline btn-sm" id="btn-quick-print-pengeluaran">Cetak Pengeluaran</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" id="table-pengeluaran">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;" class="text-center">No</th>
+                    <th style="width: 110px;">Tanggal</th>
+                    <th>Periode</th>
+                    <th>Kategori</th>
+                    <th>Keterangan</th>
+                    <th class="text-right" style="width: 140px;">Nominal</th>
+                    <th class="text-center" style="width: 130px;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-pengeluaran">
+                  <!-- Dynamically populated via JS -->
+                </tbody>
+                <tfoot>
+                  <tr class="table-total-row">
+                    <td colspan="5" class="text-center font-bold">TOTAL PENGELUARAN</td>
+                    <td class="text-right font-bold text-danger" id="total-pengeluaran-nominal">Rp0</td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div id="empty-state-pengeluaran" class="empty-state hidden">
+              <p>Belum ada data pengeluaran.</p>
+              <button class="btn btn-primary btn-sm mt-2" id="btn-empty-tambah-pengeluaran">+ Tambah
+                Pengeluaran</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. DATA SISWA VIEW -->
+        <section id="view-siswa" class="view-panel">
+          <div class="card mb-3">
+            <div class="toolbar-wrapper flex-between">
+              <div class="search-box">
+                <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg></span>
+                <input type="text" id="search-siswa-nama" class="form-control" placeholder="Cari nama siswa...">
+              </div>
+              <div class="filter-row">
+                <div class="filter-group">
+                  <label for="filter-siswa-status">Status:</label>
+                  <select id="filter-siswa-status" class="form-control form-control-sm">
+                    <option value="ALL">Semua</option>
+                    <option value="Aktif">Aktif Saja</option>
+                    <option value="Nonaktif">Nonaktif Saja</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" id="btn-open-modal-tambah-siswa">+ Tambah Siswa</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex-between">
+              <div>
+                <h3 class="card-title">DATA DAFTAR SISWA KELAS</h3>
+                <p class="card-subtitle">Kelola nama siswa, nomor urut, status aktif/nonaktif</p>
+              </div>
+              <div class="badge-counter" id="count-siswa-summary">0 Siswa</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" id="table-siswa">
+                <thead>
+                  <tr>
+                    <th style="width: 60px;" class="text-center">No</th>
+                    <th>Nama Siswa</th>
+                    <th style="width: 120px;" class="text-center">Status</th>
+                    <th>Keterangan</th>
+                    <th style="width: 180px;" class="text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-siswa">
+                  <!-- Dynamically populated via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="empty-state-siswa" class="empty-state hidden">
+              <p>Belum ada data siswa.</p>
+              <button class="btn btn-primary btn-sm mt-2" id="btn-empty-tambah-siswa">+ Tambah Siswa Baru</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. PERIODE VIEW -->
+        <section id="view-periode" class="view-panel">
+          <div class="card mb-3">
+            <div class="toolbar-wrapper flex-between">
+              <div>
+                <p class="text-muted m-0">Kelola periode bulan kas kelas. Kolom bulan pada tabel pemasukan dibuat
+                  otomatis dari daftar periode ini.</p>
+              </div>
+              <div class="action-buttons">
+                <button class="btn btn-primary" id="btn-open-modal-tambah-periode">+ Tambah Periode</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header flex-between">
+              <div>
+                <h3 class="card-title">DAFTAR PERIODE BULAN KAS</h3>
+                <p class="card-subtitle">Urutan periode menentukan susunan kolom tabel pemasukan & rekap global</p>
+              </div>
+              <div class="badge-counter" id="count-periode-summary">0 Periode</div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped" id="table-periode">
+                <thead>
+                  <tr>
+                    <th style="width: 60px;" class="text-center">Urutan</th>
+                    <th>Nama Periode</th>
+                    <th class="text-center" style="width: 100px;">Bulan</th>
+                    <th class="text-center" style="width: 100px;">Tahun</th>
+                    <th class="text-center" style="width: 120px;">Status</th>
+                    <th class="text-center" style="width: 160px;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-periode">
+                  <!-- Dynamically populated via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="empty-state-periode" class="empty-state hidden">
+              <p>Belum ada periode kas yang ditambahkan.</p>
+              <button class="btn btn-primary btn-sm mt-2" id="btn-empty-tambah-periode">+ Tambah Periode
+                Pertama</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. CETAK LAPORAN VIEW -->
+        <section id="view-cetak" class="view-panel">
+          <div class="grid-2-col">
+            <!-- Print Configuration Card -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">PENGATURAN CETAK LAPORAN</h3>
+                <p class="card-subtitle">Pilih jenis laporan yang ingin dicetak atau diekspor ke file PDF</p>
+              </div>
+
+              <div class="form-group mb-4">
+                <label class="form-label font-bold">1. Pilih Jenis Laporan:</label>
+                <div class="radio-card-group">
+                  <label class="radio-card-item">
+                    <input type="radio" name="report_type" value="ALL" checked>
+                    <div class="radio-card-body">
+                      <strong class="text-primary">Cetak Semua Rekapan (1 File PDF Lengkap)</strong>
+                      <small class="text-muted">Menggabungkan Rekap Global Saldo, Pemasukan Siswa, dan Pengeluaran dalam satu berkas PDF resmi.</small>
+                    </div>
+                  </label>
+
+                  <label class="radio-card-item">
+                    <input type="radio" name="report_type" value="GLOBAL">
+                    <div class="radio-card-body">
+                      <strong>Rekap Global Saldo</strong>
+                      <small class="text-muted">Tabel ringkasan saldo awal, pemasukan, pengeluaran, dan saldo akhir.</small>
+                    </div>
+                  </label>
+
+                  <label class="radio-card-item">
+                    <input type="radio" name="report_type" value="PEMASUKAN">
+                    <div class="radio-card-body">
+                      <strong>Rekap Pemasukan Siswa</strong>
+                      <small class="text-muted">Tabel matriks pembayaran kas seluruh siswa per bulan.</small>
+                    </div>
+                  </label>
+
+                  <label class="radio-card-item">
+                    <input type="radio" name="report_type" value="PENGELUARAN">
+                    <div class="radio-card-body">
+                      <strong>Rekap Pengeluaran Kas</strong>
+                      <small class="text-muted">Daftar transaksi pengeluaran kas, tanggal, kategori, dan nominal.</small>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label for="select-print-periode" class="form-label font-bold">2. Pilih Periode:</label>
+                <select id="select-print-periode" class="form-control">
+                  <option value="ALL">Semua Periode</option>
+                </select>
+              </div>
+
+              <div class="print-actions mt-4">
+                <button class="btn btn-primary btn-lg btn-block" id="btn-generate-pdf">
+                  Unduh File PDF (1 File Portrait)
+                </button>
+                <button class="btn btn-secondary btn-block mt-2" id="btn-browser-print">
+                  Cetak Langsung (Printer / Browser)
+                </button>
+              </div>
+            </div>
+
+            <!-- Print Preview Card -->
+            <div class="card">
+              <div class="card-header flex-between">
+                <h3 class="card-title">PREVIEW LAPORAN</h3>
+                <span class="badge badge-info" id="preview-badge-status">Siap Cetak</span>
+              </div>
+              <div class="print-preview-box" id="print-preview-container">
+                <div class="print-doc-header" id="print-doc-header">
+                  <div class="prev-inst" id="prev-doc-institution">REKAP KAS KELAS</div>
+                  <div class="prev-sub" id="prev-doc-sub"></div>
+                  <div class="prev-class" id="prev-doc-class">KELAS</div>
+                  <div class="prev-meta" id="prev-doc-meta">Tahun Ajaran 2026/2027 &bull; Periode: Semua Periode</div>
+                </div>
+                <div id="prev-doc-content" class="prev-doc-body">
+                  <!-- Live dynamic preview rendered here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. PENGATURAN VIEW -->
+        <section id="view-pengaturan" class="view-panel">
+          <div class="grid-2-col">
+            <!-- Class Information & Cash Defaults -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">INFORMASI KELAS & KAS</h3>
+                <p class="card-subtitle">Pengaturan dasar identitas kelas dan saldo kas</p>
+              </div>
+              <form id="form-settings-info" novalidate>
+                <div class="form-group">
+                  <label for="setting-class-name">Nama Kelas: <span class="text-danger">*</span></label>
+                  <input type="text" id="setting-class-name" class="form-control" placeholder="Contoh: 9A AB 2"
+                    required>
+                </div>
+                <div class="form-group">
+                  <label for="setting-academic-year">Tahun Ajaran: <span class="text-danger">*</span></label>
+                  <input type="text" id="setting-academic-year" class="form-control" placeholder="Contoh: 2026/2027"
+                    required>
+                </div>
+                <div class="form-group">
+                  <label for="setting-default-nominal">Nominal Kas Standar per Siswa (Rp):</label>
+                  <input type="text" id="setting-default-nominal" class="form-control format-rupiah"
+                    placeholder="Contoh: 100.000">
+                  <small class="form-text">Nilai nominal otomatis saat input pembayaran baru.</small>
+                </div>
+                <div class="form-group">
+                  <label for="setting-initial-balance">Saldo Awal Kas (Rp):</label>
+                  <input type="text" id="setting-initial-balance" class="form-control format-rupiah"
+                    placeholder="Contoh: 500.000">
+                  <small class="form-text">Mengubah saldo awal akan menghitung ulang seluruh saldo bergulir
+                    otomatis.</small>
+                </div>
+                
+                <div style="margin: 1.25rem 0; border-top: 1px dashed var(--border-color); padding-top: 1rem;">
+                  <h4 class="font-bold text-primary mb-1" style="font-size: 0.92rem;">KOP SURAT / HEADER LAPORAN RESMI</h4>
+                  <small class="text-muted d-block mb-3" style="display:block; margin-bottom: 0.85rem;">Kustomisasi kepala surat resmi yang muncul di bagian atas laporan cetak dan PDF (garis ganda resmi tanpa blok background).</small>
+
+                  <div class="form-group mb-3">
+                    <label for="setting-header-institution" class="form-label">Nama Sekolah / Lembaga / Instansi:</label>
+                    <input type="text" id="setting-header-institution" class="form-control" placeholder="Contoh: SMA NEGERI 1 JAKARTA / MTs PERSIS">
+                    <small class="form-text">Tampil di baris teratas kop laporan.</small>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="setting-header-sub" class="form-label">Sub-Judul / Keterangan Kop:</label>
+                    <input type="text" id="setting-header-sub" class="form-control" placeholder="Contoh: KOMITE KELAS & PAGUYUBAN WALI MURID">
+                    <small class="form-text">Tampil di baris kedua kop surat.</small>
+                  </div>
+
+                  <div class="form-group mb-3">
+                    <label for="setting-header-address" class="form-label">Alamat / Kontak / Info Tambahan:</label>
+                    <input type="text" id="setting-header-address" class="form-control" placeholder="Contoh: Jl. Merdeka No. 45 Jakarta &bull; Telp: (021) 123456">
+                    <small class="form-text">Tampil tepat di atas garis pembatas kop surat.</small>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-2">Simpan Pengaturan</button>
+              </form>
+            </div>
+
+            <!-- Categories Management -->
+            <div class="card">
+              <div class="card-header flex-between">
+                <div>
+                  <h3 class="card-title">KATEGORI PENGELUARAN</h3>
+                  <p class="card-subtitle">Kelola daftar pilihan kategori saat mencatat pengeluaran</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="btn-tambah-kategori-modal">+ Kategori Baru</button>
+              </div>
+
+              <div class="table-responsive mt-2">
+                <table class="table table-bordered table-sm" id="table-kategori">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;" class="text-center">No</th>
+                      <th>Nama Kategori</th>
+                      <th style="width: 90px;" class="text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-kategori">
+                    <!-- Dynamic categories -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Backup & Restore Section (JSON & Excel) -->
+            <div class="card grid-full-width mt-3">
+              <div class="card-header">
+                <h3 class="card-title">BACKUP, RESTORE & IMPORT DATA</h3>
+                <p class="card-subtitle">Amankan data kas Anda secara berkala atau pindahkan ke komputer lain</p>
+              </div>
+
+              <div class="grid-3-col mt-2">
+                <!-- Backup JSON Card -->
+                <div class="feature-box">
+                  <h4>Backup Data Database</h4>
+                  <p>Unduh seluruh data (Siswa, Periode, Pemasukan, Pengeluaran, Kategori, Pengaturan) menjadi satu file
+                    JSON aman.</p>
+                  <button class="btn btn-success btn-block mt-3" id="btn-export-backup-json">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Unduh Backup JSON
+                  </button>
+                </div>
+
+                <!-- Restore JSON Card -->
+                <div class="feature-box">
+                  <h4>Restore Data (JSON)</h4>
+                  <p>Pulihkan data kas dari file backup JSON sebelumnya. Dilengkapi dengan pratinjau data sebelum
+                    konfirmasi.</p>
+                  <input type="file" id="input-restore-json" accept=".json" class="hidden">
+                  <button class="btn btn-warning btn-block mt-3" id="btn-trigger-restore-json">
+                    Pilih File Backup JSON
+                  </button>
+                </div>
+
+                <!-- Import Excel Card -->
+                <div class="feature-box">
+                  <h4>Import dari File Excel</h4>
+                  <p>Import data dari spreadsheet <strong>KAS 9A AB2 Juni.xlsx</strong>. Sistem akan membaca, memetakan,
+                    dan menampilkan pratinjau.</p>
+                  <input type="file" id="input-import-excel" accept=".xlsx, .xls" class="hidden">
+                  <button class="btn btn-outline btn-block mt-3" id="btn-trigger-import-excel">
+                    Pilih File Excel (.xlsx)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. FIRST TIME SETUP WIZARD MODAL -->
+  <div class="modal-backdrop" id="modal-first-setup">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header text-center block">
+          <span class="modal-hero-icon"></span>
+          <h3 class="modal-title">SELAMAT DATANG</h3>
+          <p class="modal-subtitle">Siapkan Aplikasi Rekap Kas Kelas Anda</p>
+        </div>
+        <form id="form-first-setup" novalidate>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="setup-class-name">Nama Kelas: <span class="text-danger">*</span></label>
+              <input type="text" id="setup-class-name" class="form-control" placeholder="Contoh: 9A AB 2" required>
+            </div>
+            <div class="form-group">
+              <label for="setup-academic-year">Tahun Ajaran: <span class="text-danger">*</span></label>
+              <input type="text" id="setup-academic-year" class="form-control" placeholder="Contoh: 2026/2027" required>
+            </div>
+            <div class="form-group">
+              <label for="setup-default-nominal">Nominal Kas Bulanan Standar (Rp):</label>
+              <input type="text" id="setup-default-nominal" class="form-control format-rupiah"
+                placeholder="Contoh: 100.000" value="100.000">
+            </div>
+            <div class="form-group">
+              <label for="setup-initial-balance">Saldo Awal Kas (Rp):</label>
+              <input type="text" id="setup-initial-balance" class="form-control format-rupiah"
+                placeholder="Contoh: 500.000" value="0">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary btn-lg btn-block">MULAI SEKARANG</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PEMBAYARAN KAS MODAL (Cell click on Matrix) -->
+  <div class="modal-backdrop" id="modal-pembayaran">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title" id="modal-pembayaran-title">PEMBAYARAN KAS</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-pembayaran" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <form id="form-pembayaran" novalidate>
+          <input type="hidden" id="pembayaran-id">
+          <input type="hidden" id="pembayaran-siswa-id">
+          <input type="hidden" id="pembayaran-periode-id">
+
+          <div class="modal-body">
+            <div class="info-banner mb-3">
+              <div class="info-row">
+                <span class="info-label">Nama Siswa:</span>
+                <strong id="pembayaran-nama-siswa">-</strong>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Periode:</span>
+                <strong id="pembayaran-nama-periode">-</strong>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="pembayaran-tanggal">Tanggal Pembayaran: <span class="text-danger">*</span></label>
+              <input type="date" id="pembayaran-tanggal" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pembayaran-nominal">Nominal Pembayaran (Rp): <span class="text-danger">*</span></label>
+              <input type="text" id="pembayaran-nominal" class="form-control format-rupiah" placeholder="Rp100.000"
+                required>
+            </div>
+
+            <div class="form-group">
+              <label for="pembayaran-status">Status Pembayaran: <span class="text-danger">*</span></label>
+              <select id="pembayaran-status" class="form-control" required>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum Lunas">Belum Lunas</option>
+                <option value="BOYONG">BOYONG</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pembayaran-keterangan">Keterangan (Opsional):</label>
+              <textarea id="pembayaran-keterangan" class="form-control" rows="2"
+                placeholder="Catatan pembayaran siswa..."></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer flex-between">
+            <div>
+              <button type="button" class="btn btn-danger hidden" id="btn-hapus-pembayaran">Hapus</button>
+            </div>
+            <div class="btn-group-right">
+              <button type="button" class="btn btn-secondary" data-modal="modal-pembayaran">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-simpan-pembayaran">Simpan</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. TAMBAH/EDIT PENGELUARAN MODAL -->
+  <div class="modal-backdrop" id="modal-pengeluaran">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title" id="modal-pengeluaran-title">TAMBAH PENGELUARAN</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-pengeluaran" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <form id="form-pengeluaran" novalidate>
+          <input type="hidden" id="pengeluaran-id">
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="pengeluaran-tanggal">Tanggal: <span class="text-danger">*</span></label>
+              <input type="date" id="pengeluaran-tanggal" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pengeluaran-periode-id">Periode: <span class="text-danger">*</span></label>
+              <select id="pengeluaran-periode-id" class="form-control" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pengeluaran-kategori">Kategori: <span class="text-danger">*</span></label>
+              <select id="pengeluaran-kategori" class="form-control" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pengeluaran-keterangan">Keterangan: <span class="text-danger">*</span></label>
+              <input type="text" id="pengeluaran-keterangan" class="form-control"
+                placeholder="Contoh: Konsumsi Jum'at Berkah, Honor Ustadz" required>
+            </div>
+
+            <div class="form-group">
+              <label for="pengeluaran-nominal">Nominal (Rp): <span class="text-danger">*</span></label>
+              <input type="text" id="pengeluaran-nominal" class="form-control format-rupiah"
+                placeholder="Contoh: 150.000" required>
+            </div>
+          </div>
+
+          <div class="modal-footer flex-between">
+            <div>
+              <button type="button" class="btn btn-danger hidden" id="btn-hapus-pengeluaran-modal">Hapus</button>
+            </div>
+            <div class="btn-group-right">
+              <button type="button" class="btn btn-secondary" data-modal="modal-pengeluaran">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-simpan-pengeluaran">Simpan</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. TAMBAH/EDIT SISWA MODAL -->
+  <div class="modal-backdrop" id="modal-siswa">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title" id="modal-siswa-title">TAMBAH SISWA</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-siswa" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <form id="form-siswa" novalidate>
+          <input type="hidden" id="siswa-id">
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="siswa-nama">Nama Siswa: <span class="text-danger">*</span></label>
+              <input type="text" id="siswa-nama" class="form-control" placeholder="Contoh: Arkhan Fazio" required>
+            </div>
+
+            <div class="form-group">
+              <label for="siswa-status">Status Siswa: <span class="text-danger">*</span></label>
+              <select id="siswa-status" class="form-control" required>
+                <option value="Aktif">Aktif</option>
+                <option value="Nonaktif">Nonaktif</option>
+              </select>
+              <small class="form-text">Jika siswa pindah/keluar, ubah menjadi Nonaktif agar riwayat kas tetap
+                aman.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="siswa-keterangan">Keterangan (Opsional):</label>
+              <input type="text" id="siswa-keterangan" class="form-control" placeholder="Contoh: Pindahan, dll">
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-modal="modal-siswa">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Siswa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TAMBAH/EDIT PERIODE MODAL -->
+  <div class="modal-backdrop" id="modal-periode">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title" id="modal-periode-title">TAMBAH PERIODE</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-periode" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <form id="form-periode" novalidate>
+          <input type="hidden" id="periode-id">
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="periode-bulan">Bulan: <span class="text-danger">*</span></label>
+              <select id="periode-bulan" class="form-control" required>
+                <option value="Januari">Januari</option>
+                <option value="Februari">Februari</option>
+                <option value="Maret">Maret</option>
+                <option value="April">April</option>
+                <option value="Mei">Mei</option>
+                <option value="Juni">Juni</option>
+                <option value="Juli">Juli</option>
+                <option value="Agustus">Agustus</option>
+                <option value="September">September</option>
+                <option value="Oktober">Oktober</option>
+                <option value="November">November</option>
+                <option value="Desember">Desember</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="periode-tahun">Tahun: <span class="text-danger">*</span></label>
+              <input type="number" id="periode-tahun" class="form-control" min="2020" max="2050" required>
+            </div>
+
+            <div class="form-group">
+              <label for="periode-urutan">Urutan Kolom:</label>
+              <input type="number" id="periode-urutan" class="form-control" min="1" max="100" required>
+              <small class="form-text">Urutan posisi kolom tabel dari kiri ke kanan (1, 2, 3, dst).</small>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="periode-aktif" checked>
+                <span>Periode Aktif (Tampilkan di tabel matriks kas)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-modal="modal-periode">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Periode</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. TAMBAH KATEGORI MODAL -->
+  <div class="modal-backdrop" id="modal-kategori">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title">TAMBAH KATEGORI</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-kategori" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <form id="form-tambah-kategori" novalidate>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="input-nama-kategori">Nama Kategori: <span class="text-danger">*</span></label>
+              <input type="text" id="input-nama-kategori" class="form-control" placeholder="Contoh: Kebersihan"
+                required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-modal="modal-kategori">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. RESTORE PREVIEW & CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="modal-restore-preview">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title">KONFIRMASI RESTORE DATA</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-restore-preview" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning mb-3">
+            <strong>Perhatian:</strong> Memulihkan (Restore) data akan <strong>mengganti seluruh data saat
+              ini</strong> dengan data dari file backup. Pastikan Anda telah mengamankan data Anda jika perlu.
+          </div>
+          <p>Rincian data yang akan dipulihkan dari file backup:</p>
+          <div class="restore-stats-box" id="restore-stats-content">
+            <!-- Dynamic stats -->
+          </div>
+        </div>
+        <div class="modal-footer flex-between">
+          <button type="button" class="btn btn-secondary" data-modal="modal-restore-preview">Batal</button>
+          <button type="button" class="btn btn-danger" id="btn-confirm-execute-restore">Ya, Pulihkan Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. EXCEL IMPORT PREVIEW & CONFIRMATION MODAL -->
+  <div class="modal-backdrop" id="modal-excel-preview">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <h3 class="modal-title">PREVIEW IMPORT FILE EXCEL</h3>
+          <button type="button" class="btn-close-modal" data-modal="modal-excel-preview" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+          <p>Sistem telah menganalisis struktur file Excel. Silakan periksa rincian sebelum diimport:</p>
+          <div class="excel-preview-stats" id="excel-stats-content">
+            <!-- Summary stats -->
+          </div>
+          <div class="preview-tables-wrapper mt-3" id="excel-tables-preview">
+            <!-- Previews -->
+          </div>
+        </div>
+        <div class="modal-footer flex-between">
+          <button type="button" class="btn btn-secondary" data-modal="modal-excel-preview">Batal</button>
+          <button type="button" class="btn btn-success" id="btn-confirm-execute-excel-import">Import Data ke
+            Aplikasi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- PRINTABLE DOCUMENT CONTAINER (Used for browser print / high-fidelity views) -->
+  <div id="printable-area" class="printable-area"></div>
+
+  <!-- CUSTOM CONFIRM DIALOG MODAL -->
+  <div class="modal-backdrop" id="modal-custom-confirm">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="confirm-modal-title">Konfirmasi</h3>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-icon-wrapper" id="confirm-icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p class="confirm-message" id="confirm-modal-message">Apakah Anda yakin?</p>
+        </div>
+        <div class="modal-footer" style="justify-content:center; gap:0.75rem;">
+          <button class="btn btn-secondary" id="confirm-modal-cancel">Batal</button>
+          <button class="btn btn-danger" id="confirm-modal-ok">Ya, Lanjutkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM ALERT DIALOG MODAL -->
+  <div class="modal-backdrop" id="modal-custom-alert">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="alert-modal-title">Informasi</h3>
+        </div>
+        <div class="modal-body">
+          <div class="confirm-icon-wrapper alert-icon" id="alert-icon-wrapper">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p class="confirm-message" id="alert-modal-message">Pesan</p>
+        </div>
+        <div class="modal-footer" style="justify-content:center;">
+          <button class="btn btn-primary" id="alert-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHANGELOG & UPDATE MODAL -->
+  <div class="modal-backdrop" id="modal-changelog">
+    <div class="modal-dialog modal-md">
+      <div class="modal-content">
+        <div class="modal-header flex-between">
+          <div>
+            <h3 class="modal-title">✨ Pembaruan Rekap Kas</h3>
+            <p class="modal-subtitle"><span id="changelog-modal-version">v2.4.0</span> &bull; <span id="changelog-modal-date">02 Oktober 2026</span></p>
+          </div>
+          <button type="button" class="btn-close-modal" data-modal="modal-changelog" aria-label="Tutup"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+          <div class="changelog-list" id="changelog-items-list">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+        <div class="modal-footer flex-between">
+          <span class="text-muted" style="font-size: 0.78rem;">Status: Terpasang &amp; Terbaru</span>
+          <button type="button" class="btn btn-primary" data-modal="modal-changelog">Tutup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER DROPDOWN OVERLAY -->
+  <div id="user-dropdown-overlay" class="user-dropdown-overlay"></div>
+
+  <!-- Auth Loading Overlay -->
+  <div id="auth-loading">
+    <div class="spinner"></div>
+    <p class="spinner-text">Memeriksa sesi login...</p>
+  </div>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="hidden">
+    <div class="login-card">
+      <div class="login-card-header">
+        <div class="login-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+            <path d="M6 15h2" /><path d="M12 15h6" />
+          </svg>
+        </div>
+        <h1 class="login-title">REKAP KAS KELAS</h1>
+        <p class="login-subtitle">Masuk menggunakan Akun Admin Kas</p>
+      </div>
+      <div class="login-body">
+        <div id="login-error" class="login-error"></div>
+        <form id="form-auth" onsubmit="handleAuthSubmit(event)" novalidate>
+          <div class="form-group">
+            <label for="auth-username">Username / Email:</label>
+            <input type="text" id="auth-username" class="form-control" placeholder="Masukkan username atau email" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="auth-password">Password:</label>
+            <input type="password" id="auth-password" class="form-control" placeholder="Masukkan password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-auth-submit">Masuk ke Sistem</button>
+        </form>
+      </div>
+      <div class="login-footer">
+        Aplikasi Rekap Kas Kelas &bull; Data tersinkronisasi online &amp; offline
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase DB Wrapper (sebelum app.js) -->
+  <script src="firebase-db.js?v=20261002_v13"></script>
+
+  <!-- Core Application Script -->
+  <script src="app.js?v=20261002_v13"></script>
+
+  <script>
+    function getAuthCredentials() {
+      const userInput = (document.getElementById('auth-username').value || '').trim();
+      const rawPass   = (document.getElementById('auth-password').value || '').trim();
+      
+      const email = userInput.includes('@') 
+        ? userInput.toLowerCase() 
+        : (userInput.toLowerCase() || 'admin') + '@rekapkas.local';
+        
+      const passwordsToTry = [
+        rawPass.length < 6 ? (rawPass + '_kas2026') : rawPass,
+        'password2026',
+        rawPass
+      ];
+      
+      return { email, passwordsToTry, username: userInput || 'admin' };
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const { email, passwordsToTry, username } = getAuthCredentials();
+      const errEl = document.getElementById('login-error');
+      const btn   = document.getElementById('btn-auth-submit');
+
+      errEl.classList.remove('show');
+      btn.disabled = true;
+      btn.textContent = 'Memproses...';
+
+      try {
+        let user = null;
+        let lastError = null;
+
+        // Coba login dengan candidate password
+        for (const pwd of passwordsToTry) {
+          try {
+            user = await App.db.login(email, pwd);
+            if (user) break;
+          } catch (loginErr) {
+            lastError = loginErr;
+            if (loginErr.code === 'auth/user-not-found' || loginErr.code === 'auth/invalid-credential') {
+              // Jika user belum terdaftar, coba register langsung
+              try {
+                user = await App.db.register(email, passwordsToTry[0]);
+                if (user) break;
+              } catch (regErr) {
+                lastError = regErr;
+              }
+            }
+          }
+        }
+
+        if (!user && lastError) {
+          throw lastError;
+        }
+
+        await App.postLoginInit();
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app').style.display = '';
+        showUserPill(username);
+      } catch (err) {
+        console.error('Auth error:', err);
+        const msgs = {
+          'auth/wrong-password': 'Password salah. Silakan periksa kembali.',
+          'auth/network-request-failed': 'Tidak ada koneksi internet.'
+        };
+        errEl.textContent = msgs[err.code] || ('Gagal masuk: ' + (err.message || 'Terjadi kesalahan'));
+        errEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Masuk ke Sistem';
+      }
+    }
+
+    function showUserPill(name) {
+      // Update sidebar user card
+      const card    = document.getElementById('sidebar-user-card');
+      const avatar  = document.getElementById('sidebar-user-avatar');
+      const nameEl  = document.getElementById('sidebar-user-name');
+      if (!card) return;
+      const cleanName = name.includes('@') ? name.split('@')[0] : name;
+      const initial = (cleanName[0] || 'A').toUpperCase();
+      if (avatar) avatar.textContent = initial;
+      if (nameEl) nameEl.textContent = cleanName;
+      card.style.display = 'flex';
+      // Also update topbar pill if visible (desktop)
+      const headerClass = document.getElementById('header-class-name');
+      // Keep info pill visible
+    }
+
+    // Sidebar logout button handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const sidebarLogout = document.getElementById('btn-sidebar-logout');
+      if (sidebarLogout) {
+        sidebarLogout.addEventListener('click', async () => {
+          customConfirm('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar dari akun ini?', 'danger').then(async (confirmed) => {
+            if (confirmed) {
+              if (App && App.db) await App.db.logout();
+              window.location.reload();
+            }
+          });
+        });
+      }
+
+      // Sidebar version badge click handler -> Open Changelog
+      const sidebarVersion = document.getElementById('btn-sidebar-version');
+      if (sidebarVersion) {
+        sidebarVersion.addEventListener('click', () => {
+          if (window.App && typeof window.App.showChangelogModal === 'function') {
+            window.App.showChangelogModal();
+          } else {
+            const modal = document.getElementById('modal-changelog');
+            if (modal) modal.classList.add('show');
+          }
+        });
+      }
+    });
+
+    // Custom Confirm Dialog
+    function customConfirm(title, message, type = 'danger') {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-custom-confirm');
+        document.getElementById('confirm-modal-title').textContent = title;
+        document.getElementById('confirm-modal-message').textContent = message;
+        const okBtn = document.getElementById('confirm-modal-ok');
+        okBtn.className = 'btn ' + (type === 'danger' ? 'btn-danger' : 'btn-primary');
+        modal.classList.add('show');
+
+        function cleanup() {
+          modal.classList.remove('show');
+          okBtn.removeEventListener('click', onOk);
+          document.getElementById('confirm-modal-cancel').removeEventListener('click', onCancel);
+        }
+        function onOk() { cleanup(); resolve(true); }
+        function onCancel() { cleanup(); resolve(false); }
+        okBtn.addEventListener('click', onOk);
+        document.getElementById('confirm-modal-cancel').addEventListener('click', onCancel);
+      });
+    }
+
+    // Custom Alert Dialog
+    function customAlert(title, message, type = 'info') {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('modal-custom-alert');
+        document.getElementById('alert-modal-title').textContent = title || 'Informasi';
+        document.getElementById('alert-modal-message').textContent = message;
+        const iconWrapper = document.getElementById('alert-icon-wrapper');
+        iconWrapper.className = 'confirm-icon-wrapper ' + (type === 'danger' ? 'alert-icon-danger' : type === 'warning' ? 'alert-icon-warning' : 'alert-icon');
+        modal.classList.add('show');
+
+        const okBtn = document.getElementById('alert-modal-ok');
+        function onOk() {
+          modal.classList.remove('show');
+          okBtn.removeEventListener('click', onOk);
+          resolve();
+        }
+        okBtn.addEventListener('click', onOk);
+      });
+    }
+
+    // Expose globally
+    window.customConfirm = customConfirm;
+    window.customAlert = customAlert;
+
+    // ==========================================
+    // PWA INSTALL PROMPT & SERVICE WORKER
+    // ==========================================
+    let deferredPwaPrompt = null;
+
+    function isRunningStandalone() {
+      return (
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://')
+      );
+    }
+
+    function checkAndShowPwaBanner() {
+      if (isRunningStandalone()) {
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.classList.remove('show');
+        const sidebarBtn = document.getElementById('btn-sidebar-install-pwa');
+        if (sidebarBtn) sidebarBtn.style.display = 'none';
+        return;
+      }
+
+      // Show sidebar button
+      const sidebarBtn = document.getElementById('btn-sidebar-install-pwa');
+      if (sidebarBtn) sidebarBtn.style.display = 'flex';
+
+      // Check session dismissal
+      const isDismissed = sessionStorage.getItem('pwa_prompt_dismissed');
+      const banner = document.getElementById('pwa-install-banner');
+      if (banner && !isDismissed) {
+        setTimeout(() => {
+          if (!isRunningStandalone() && !sessionStorage.getItem('pwa_prompt_dismissed')) {
+            banner.classList.add('show');
+          }
+        }, 1500);
+      }
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPwaPrompt = e;
+      checkAndShowPwaBanner();
+    });
+
+    // Auto-check on DOM loaded in case beforeinstallprompt already fired or is not supported (e.g. iOS)
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAndShowPwaBanner();
+    });
+
+    async function triggerPwaInstall() {
+      if (deferredPwaPrompt) {
+        deferredPwaPrompt.prompt();
+        const { outcome } = await deferredPwaPrompt.userChoice;
+        if (outcome === 'accepted') {
+          if (typeof Utils !== 'undefined' && Utils.showToast) {
+            Utils.showToast('Aplikasi Rekap Kas berhasil diinstall!', 'success');
+          }
+        }
+        deferredPwaPrompt = null;
+        dismissPwaBanner();
+      } else {
+        // Panduan manual jika prompt otomatis tidak tersedia
+        customAlert(
+          'Install Aplikasi Rekap Kas',
+          'Untuk menginstall aplikasi ini:\n\n' +
+          '• Di Android (Chrome): Ketuk titik tiga (⋮) di pojok kanan atas, lalu pilih "Install Aplikasi" atau "Tambahkan ke Layar Utama".\n' +
+          '• Di iPhone (Safari): Ketuk tombol Bagikan (Share ⎋), lalu pilih "Add to Home Screen" (Tambahkan ke Layar Utama).\n' +
+          '• Di Komputer (Chrome/Edge): Klik ikon install (⊕ / ⬇) di ujung bilah alamat URL browser.',
+          'info'
+        );
+      }
+    }
+
+    function dismissPwaBanner() {
+      const banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.classList.remove('show');
+      sessionStorage.setItem('pwa_prompt_dismissed', 'true');
+    }
+
+    window.addEventListener('appinstalled', () => {
+      deferredPwaPrompt = null;
+      dismissPwaBanner();
+      const sidebarBtn = document.getElementById('btn-sidebar-install-pwa');
+      if (sidebarBtn) sidebarBtn.style.display = 'none';
+      if (typeof Utils !== 'undefined' && Utils.showToast) {
+        Utils.showToast('Aplikasi Rekap Kas berhasil terpasang!', 'success');
+      }
+    });
+
+    window.triggerPwaInstall = triggerPwaInstall;
+    window.dismissPwaBanner = dismissPwaBanner;
+
+    // Register Service Worker (PWA) with automatic update check
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          reg.update().catch(() => {});
+        }).catch(() => {});
+      });
+    }
+  </script>
+
+  <!-- PWA INSTALL FLOATING POPUP / BANNER -->
+  <div id="pwa-install-banner" class="pwa-install-banner">
+    <div class="pwa-banner-card">
+      <div class="pwa-banner-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <line x1="2" y1="10" x2="22" y2="10" />
+          <path d="M6 15h2" /><path d="M12 15h6" />
+        </svg>
+      </div>
+      <div class="pwa-banner-info">
+        <h4 class="pwa-banner-title">Install Rekap Kas</h4>
+        <p class="pwa-banner-desc">Pasang aplikasi di layar utama HP / Laptop untuk akses instan & offline.</p>
+      </div>
+      <div class="pwa-banner-actions">
+        <button type="button" class="btn btn-sm btn-secondary" onclick="dismissPwaBanner()">Nanti</button>
+        <button type="button" class="btn btn-sm btn-primary" onclick="triggerPwaInstall()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Install
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
