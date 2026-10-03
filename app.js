@@ -718,8 +718,9 @@
       }
       this.state.kategoriList = categories;
 
-      // 3. Siswa
-      this.state.siswaList = await this.db.getAll('siswa');
+      // 3. Siswa (Sorted A-Z by default)
+      const rawSiswa = await this.db.getAll('siswa');
+      this.state.siswaList = rawSiswa.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
 
       // 4. Periode
       const periods = await this.db.getAll('periode');
@@ -1612,7 +1613,7 @@
       const searchQuery = searchNama ? searchNama.value.toLowerCase().trim() : '';
       const statusFilter = filterStatus ? filterStatus.value : 'ALL';
 
-      let students = [...this.state.siswaList];
+      let students = [...this.state.siswaList].sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
 
       if (searchQuery) {
         students = students.filter(s => s.nama.toLowerCase().includes(searchQuery));
@@ -2339,7 +2340,8 @@
           if (siswa) {
             siswa.status = newStatus;
             await this.db.put('siswa', siswa);
-            this.state.siswaList = await this.db.getAll('siswa');
+            const allSiswa = await this.db.getAll('siswa');
+            this.state.siswaList = allSiswa.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
             Utils.showToast(`Status siswa diubah menjadi ${newStatus}.`, 'success');
             this.renderSiswa();
           }
@@ -2400,7 +2402,8 @@
         Utils.showToast('Data berhasil disimpan.', 'success');
       }
 
-      this.state.siswaList = await this.db.getAll('siswa');
+      const allSiswa = await this.db.getAll('siswa');
+      this.state.siswaList = allSiswa.sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
       this.closeModal('modal-siswa');
       this.renderCurrentView();
     },
@@ -3491,9 +3494,10 @@
         XLSX.utils.book_append_sheet(wb, wsSummary, 'Ringkasan');
 
         // 2. Daftar Siswa
+        const sortedSiswaExcel = [...this.state.siswaList].sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
         const siswaData = [
           ['No', 'ID', 'NISN', 'Nama Siswa', 'Jenis Kelamin', 'Status'],
-          ...this.state.siswaList.map((s, i) => [i + 1, s.id, s.nisn || '', s.nama, s.jenis_kelamin || 'L', s.status || 'Aktif'])
+          ...sortedSiswaExcel.map((s, i) => [i + 1, s.id, s.nisn || '', s.nama, s.jenis_kelamin || 'L', s.status || 'Aktif'])
         ];
         const wsSiswa = XLSX.utils.aoa_to_sheet(siswaData);
         XLSX.utils.book_append_sheet(wb, wsSiswa, 'Siswa');
@@ -3510,7 +3514,7 @@
         const paymentMap = this.getValidPaymentMap();
 
         const headerRow = ['No', 'Nama Siswa', ...this.state.periodeList.map(p => `${p.bulan} ${p.tahun}`), 'Total Bayar'];
-        const matrixRows = this.state.siswaList.map((s, i) => {
+        const matrixRows = sortedSiswaExcel.map((s, i) => {
           let total = 0;
           const cols = this.state.periodeList.map(p => {
             const pay = paymentMap[`${s.id}_${p.id}`];
@@ -3565,7 +3569,8 @@
         const periodHeaders = this.state.periodeList.map(p => `"${p.bulan} ${p.tahun}"`).join(',');
         csv += `No,Nama Siswa,${periodHeaders},Total (Rp)\n`;
 
-        this.state.siswaList.forEach((s, i) => {
+        const sortedSiswaCsv = [...this.state.siswaList].sort((a, b) => (a.nama || '').localeCompare(b.nama || '', 'id', { sensitivity: 'base' }));
+        sortedSiswaCsv.forEach((s, i) => {
           let total = 0;
           const cols = this.state.periodeList.map(p => {
             const pay = paymentMap[`${s.id}_${p.id}`];
