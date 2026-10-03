@@ -1479,7 +1479,6 @@
       // Render Rekap Global Table
       const tbody = document.getElementById('tbody-rekap-global');
       const emptyState = document.getElementById('empty-state-global');
-      const totalInitialEl = document.getElementById('global-total-initial-balance');
       const totalIncomeEl = document.getElementById('global-total-income');
       const totalExpenseEl = document.getElementById('global-total-expense');
       const finalBalanceEl = document.getElementById('global-final-balance');
@@ -1519,9 +1518,6 @@
 
       tbody.innerHTML = html;
 
-      if (totalInitialEl) {
-        totalInitialEl.textContent = Utils.formatRupiah(displayGlobalData[0]?.saldoAwal || this.state.settings.initialBalance);
-      }
       if (totalIncomeEl) totalIncomeEl.textContent = Utils.formatRupiah(filteredIncomeSum);
       if (totalExpenseEl) totalExpenseEl.textContent = Utils.formatRupiah(filteredExpenseSum);
       if (finalBalanceEl) {
