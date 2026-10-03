@@ -1322,3 +1322,32 @@ select.is-invalid {
   40%, 60% { transform: translate3d(3.5px, 0, 0); }
 }
 
+/* ====================== BULK INPUT PEMASUKAN STYLES ====================== */
+.bulk-student-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+.bulk-student-item:hover {
+  background-color: rgba(33, 94, 97, 0.04);
+}
+.bulk-student-item label {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+  width: 100%;
+}
+.bulk-student-item input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #215E61;
+  cursor: pointer;
+}
+
+

@@ -150,7 +150,7 @@
         <!-- Version & Changelog Button (Klik untuk buka Changelog) -->
         <button type="button" class="sidebar-version-badge" id="btn-sidebar-version" title="Klik untuk melihat catatan pembaruan">
           <span class="version-dot"></span>
-          <span class="version-tag">v2.4.0</span>
+          <span class="version-tag">v2.5.0</span>
         </button>
       </div>
     </aside>
@@ -348,8 +348,12 @@
                 <h3 class="card-title">TABEL REKAP PEMASUKAN KAS (MATRIKS)</h3>
                 <p class="card-subtitle">Format tabel matriks siswa dan periode pembayaran</p>
               </div>
-              <div class="card-actions">
-                <button class="btn btn-primary btn-sm" id="btn-quick-print-pemasukan">Cetak Rekap Pemasukan</button>
+              <div class="card-actions" style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn btn-success btn-sm" id="btn-open-modal-bulk-pemasukan">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Input Kas Massal
+                </button>
+                <button class="btn btn-outline btn-sm" id="btn-quick-print-pemasukan">Cetak Rekap Pemasukan</button>
               </div>
             </div>
 
@@ -891,6 +895,68 @@
               <button type="button" class="btn btn-secondary" data-modal="modal-pembayaran">Batal</button>
               <button type="submit" class="btn btn-primary" id="btn-simpan-pembayaran">Simpan</button>
             </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- BULK PEMBAYARAN KAS MODAL -->
+  <div class="modal-backdrop" id="modal-bulk-pemasukan">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">INPUT PEMBAYARAN KAS MASSAL (BULK)</h3>
+        </div>
+        <form id="form-bulk-pemasukan" novalidate>
+          <div class="modal-body">
+            <div class="row-form-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;">
+              <div class="form-group mb-2">
+                <label for="bulk-pemasukan-periode-id">Pilih Periode Kas: <span class="text-danger">*</span></label>
+                <select id="bulk-pemasukan-periode-id" class="form-control" required>
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+
+              <div class="form-group mb-2">
+                <label for="bulk-pemasukan-tanggal">Tanggal Pembayaran: <span class="text-danger">*</span></label>
+                <input type="date" id="bulk-pemasukan-tanggal" class="form-control" required>
+              </div>
+
+              <div class="form-group mb-2">
+                <label for="bulk-pemasukan-nominal">Nominal Per Siswa (Rp): <span class="text-danger">*</span></label>
+                <input type="text" id="bulk-pemasukan-nominal" class="form-control format-rupiah" placeholder="Rp100.000" required>
+              </div>
+
+              <div class="form-group mb-2">
+                <label for="bulk-pemasukan-status">Status Pembayaran: <span class="text-danger">*</span></label>
+                <select id="bulk-pemasukan-status" class="form-control" required>
+                  <option value="Lunas">Lunas</option>
+                  <option value="Belum Lunas">Belum Lunas</option>
+                  <option value="BOYONG">BOYONG</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="bulk-students-header flex-between align-center mt-3 mb-2" style="padding: 8px 12px; background: rgba(33, 94, 97, 0.06); border-radius: 8px;">
+              <div style="font-weight: 600; color: #215E61; font-size: 0.9rem;">
+                Daftar Siswa (<span id="bulk-selected-count">0</span> dipilih)
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="bulk-search-siswa" class="form-control form-control-sm" placeholder="Filter siswa..." style="max-width: 150px; font-size: 0.8rem;">
+                <button type="button" class="btn btn-outline btn-sm" id="btn-bulk-toggle-all">Pilih Semua</button>
+              </div>
+            </div>
+
+            <div id="bulk-students-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color, #e2e8f0); border-radius: 8px; padding: 8px;">
+              <!-- Student checkboxes rendered via JS -->
+            </div>
+          </div>
+
+          <div class="modal-footer flex-between">
+            <button type="button" class="btn btn-secondary" data-modal="modal-bulk-pemasukan">Batal</button>
+            <button type="submit" class="btn btn-success" id="btn-simpan-bulk-pemasukan">Simpan Pembayaran Massal</button>
           </div>
         </form>
       </div>

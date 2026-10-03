@@ -70,9 +70,24 @@
   // ==========================================
   // APP VERSION & CHANGELOG CONFIG
   // ==========================================
-  const APP_VERSION = 'v2.4.0';
-  const APP_BUILD_DATE = '02 Oktober 2026';
+  const APP_VERSION = 'v2.5.0';
+  const APP_BUILD_DATE = '03 Oktober 2026';
   const APP_CHANGELOG = [
+    {
+      badge: 'Input Kas Massal',
+      title: 'Fitur Bulk Input Pemasukan Kas',
+      desc: 'Memungkinkan pencatatan pembayaran kas siswa secara massal untuk periode yang dipilih dalam satu langkah cepat, lengkap dengan checklist siswa, pencarian cepat, dan toggle pilih semua.'
+    },
+    {
+      badge: 'Perhitungan Presisi',
+      title: 'Perbaikan Kalkulasi Global & Deduplikasi Data',
+      desc: 'Memperbaiki algoritma akumulasi saldo Rekap Global agar deduplikasi data ganda bekerja sempurna, mengabaikan transaksi berstatus Belum Lunas, dan menyinkronkan nominal antara Dashboard, Matriks Pemasukan, serta Ekspor PDF/Excel.'
+    },
+    {
+      badge: 'Validasi Siswa',
+      title: 'Cegah Duplikasi Nama Siswa',
+      desc: 'Menambahkan validasi ketat saat menambah atau mengedit nama siswa untuk mencegah pendaftaran nama yang sama secara tidak sengaja.'
+    },
     {
       badge: 'Desain Minimalis',
       title: 'Penyederhanaan Header Modal Dialog',
@@ -87,21 +102,6 @@
       badge: 'PWA & Mobile',
       title: 'Instalasi PWA & Akses Cepat',
       desc: 'Dukungan instalasi PWA otomatis di HP Android, iOS Safari (Tambahkan ke Layar Utama), serta Desktop dengan tombol pintasan di sidebar.'
-    },
-    {
-      badge: 'Notifikasi',
-      title: 'Alert Estetik & Posisi Kanan Bawah',
-      desc: 'Notifikasi desktop kini muncul di kanan bawah dengan slide-up halus, dan di HP tampil sebagai Floating Capsule yang modern dan tidak menutupi konten.'
-    },
-    {
-      badge: 'Performa',
-      title: 'Auto-Update & Service Worker Network-First',
-      desc: 'Sistem caching diperbarui sehingga aplikasi selalu memuat versi paling baru secara instan tanpa tertinggal cache lama.'
-    },
-    {
-      badge: 'Akun & Keamanan',
-      title: 'Menu Akun & Konfirmasi Khusus',
-      desc: 'Informasi pengguna dan tombol logout diposisikan elegan di sidebar kiri bawah lengkap dengan dialog konfirmasi khusus bertema aplikasi.'
     }
   ];
 
@@ -726,7 +726,46 @@
       this.state.periodeList = periods.sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
 
       // 5. Pemasukan
-      this.state.pemasukanList = await this.db.getAll('pemasukan');
+      let rawPemasukan = await this.db.getAll('pemasukan');
+      const validSiswaIds = new Set(this.state.siswaList.map(s => String(s.id)));
+      const validPeriodeIds = new Set(this.state.periodeList.map(p => String(p.id)));
+
+      const seenMap = new Map();
+      const duplicatesToRemove = [];
+
+      rawPemasukan.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+      const cleanPemasukan = [];
+      for (const item of rawPemasukan) {
+        if (!item) continue;
+        const sId = String(item.siswa_id);
+        const pId = String(item.periode_id);
+
+        if (!validSiswaIds.has(sId) || !validPeriodeIds.has(pId)) {
+          if (item.id) duplicatesToRemove.push(item.id);
+          continue;
+        }
+
+        const key = `${sId}_${pId}`;
+        if (seenMap.has(key)) {
+          if (item.id) duplicatesToRemove.push(item.id);
+        } else {
+          seenMap.set(key, item);
+          cleanPemasukan.push(item);
+        }
+      }
+
+      if (duplicatesToRemove.length > 0) {
+        for (const idToRemove of duplicatesToRemove) {
+          try {
+            await this.db.delete('pemasukan', idToRemove);
+          } catch (e) {
+            console.warn('Failed deleting duplicate payment ID:', idToRemove, e);
+          }
+        }
+      }
+
+      this.state.pemasukanList = cleanPemasukan;
 
       // 6. Pengeluaran
       this.state.pengeluaranList = await this.db.getAll('pengeluaran');
@@ -954,6 +993,27 @@
                 }
               }
             })
+        });
+      }
+
+      // 2b. Bulk Pembayaran Modal Submit & Controls
+      const btnOpenBulkPemasukan = document.getElementById('btn-open-modal-bulk-pemasukan');
+      const formBulkPemasukan = document.getElementById('form-bulk-pemasukan');
+      const btnBulkToggleAll = document.getElementById('btn-bulk-toggle-all');
+
+      if (btnOpenBulkPemasukan) {
+        btnOpenBulkPemasukan.addEventListener('click', () => this.openBulkPemasukanModal());
+      }
+
+      if (btnBulkToggleAll) {
+        btnBulkToggleAll.addEventListener('click', () => this.toggleBulkAllStudents());
+      }
+
+      if (formBulkPemasukan) {
+        formBulkPemasukan.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          if (!Utils.validateForm(formBulkPemasukan)) return;
+          await this.saveBulkPemasukan();
         });
       }
 
@@ -1389,12 +1449,15 @@
       }
 
       // Calculate totals
-      let totalIncome = this.state.pemasukanList.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
-      let totalExpense = this.state.pengeluaranList.reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+      let totalIncome = globalData.reduce((sum, d) => sum + d.pemasukan, 0);
+      let totalExpense = globalData.reduce((sum, d) => sum + d.pengeluaran, 0);
       let currentBalance = Number(this.state.settings.initialBalance) + totalIncome - totalExpense;
 
       const activeStudentsCount = this.state.siswaList.filter(s => s.status === 'Aktif').length;
       const totalStudentsCount = this.state.siswaList.length;
+
+      const validPaymentMap = this.getValidPaymentMap();
+      const validPaymentsCount = Object.values(validPaymentMap).filter(p => p && p.status !== 'Belum Lunas').length;
 
       // Update Stat Cards
       const statCurrentBalance = document.getElementById('stat-current-balance');
@@ -1409,7 +1472,7 @@
       if (statTotalIncome) statTotalIncome.textContent = Utils.formatRupiah(totalIncome);
       if (statTotalExpense) statTotalExpense.textContent = Utils.formatRupiah(totalExpense);
       if (statActiveStudents) statActiveStudents.textContent = activeStudentsCount;
-      if (statIncomeCount) statIncomeCount.textContent = `${this.state.pemasukanList.length} Transaksi Kas`;
+      if (statIncomeCount) statIncomeCount.textContent = `${validPaymentsCount} Transaksi Kas`;
       if (statExpenseCount) statExpenseCount.textContent = `${this.state.pengeluaranList.length} Transaksi Pengeluaran`;
       if (statTotalStudents) statTotalStudents.textContent = `Total ${totalStudentsCount} Siswa Terdaftar`;
 
@@ -1467,16 +1530,43 @@
       }
     },
 
+    // Helper to get valid, deduplicated payments indexed by student & period
+    getValidPaymentMap() {
+      const studentIds = new Set(this.state.siswaList.map(s => String(s.id)));
+      const periodIds = new Set(this.state.periodeList.map(p => String(p.id)));
+      const paymentMap = {};
+
+      this.state.pemasukanList.forEach((pay) => {
+        if (!pay) return;
+        const sId = String(pay.siswa_id);
+        const pId = String(pay.periode_id);
+
+        if (studentIds.has(sId) && periodIds.has(pId)) {
+          const key = `${sId}_${pId}`;
+          if (!paymentMap[key] || (pay.id && pay.id > (paymentMap[key].id || 0))) {
+            paymentMap[key] = pay;
+          }
+        }
+      });
+
+      return paymentMap;
+    },
+
     // Rolling balance calculation per period in sequential order
     calculateRekapGlobal() {
       const sortedPeriods = [...this.state.periodeList].sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
+      const paymentMap = this.getValidPaymentMap();
       const result = [];
       let runningBalance = Number(this.state.settings.initialBalance) || 0;
 
       for (const p of sortedPeriods) {
-        const periodIncome = this.state.pemasukanList
-          .filter(item => String(item.periode_id) === String(p.id))
-          .reduce((sum, item) => sum + (Number(item.nominal) || 0), 0);
+        let periodIncome = 0;
+        this.state.siswaList.forEach((s) => {
+          const pay = paymentMap[`${s.id}_${p.id}`];
+          if (pay && pay.status !== 'Belum Lunas') {
+            periodIncome += (Number(pay.nominal) || 0);
+          }
+        });
 
         const periodExpense = this.state.pengeluaranList
           .filter(item => String(item.periode_id) === String(p.id))
@@ -1567,10 +1657,7 @@
       let grandTotalSum = 0;
 
       // Index payments by `siswa_id_periode_id` for fast lookup
-      const paymentMap = {};
-      this.state.pemasukanList.forEach((pay) => {
-        paymentMap[`${pay.siswa_id}_${pay.periode_id}`] = pay;
-      });
+      const paymentMap = this.getValidPaymentMap();
 
       let bodyHtml = '';
       let displayIndex = 1;
@@ -1590,8 +1677,11 @@
           }
 
           if (pay) {
-            studentTotal += nominal;
-            periodColumnTotals[p.id] += nominal;
+            const isPaid = (status !== 'Belum Lunas');
+            const effectiveNominal = isPaid ? nominal : 0;
+
+            studentTotal += effectiveNominal;
+            periodColumnTotals[p.id] += effectiveNominal;
 
             let badgeClass = 'badge-success';
             if (status === 'Belum Lunas') badgeClass = 'badge-warning';
@@ -1768,6 +1858,180 @@
 
       this.state.pemasukanList = await this.db.getAll('pemasukan');
       this.closeModal('modal-pembayaran');
+      this.renderCurrentView();
+    },
+
+    // Bulk Input Pemasukan Methods
+    openBulkPemasukanModal() {
+      const selectPeriode = document.getElementById('bulk-pemasukan-periode-id');
+      const inputTanggal = document.getElementById('bulk-pemasukan-tanggal');
+      const inputNominal = document.getElementById('bulk-pemasukan-nominal');
+      const selectStatus = document.getElementById('bulk-pemasukan-status');
+      const searchBox = document.getElementById('bulk-search-siswa');
+
+      if (!selectPeriode) return;
+
+      const sortedPeriods = [...this.state.periodeList]
+        .filter(p => p.aktif !== false)
+        .sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
+
+      if (sortedPeriods.length === 0) {
+        window.customAlert('Periode Kosong', 'Tidak ada periode kas aktif untuk diinput. Silakan tambah periode baru terlebih dahulu.', 'warning');
+        return;
+      }
+
+      selectPeriode.innerHTML = sortedPeriods.map(p =>
+        `<option value="${p.id}">${p.nama_periode || (p.bulan + ' ' + p.tahun)}</option>`
+      ).join('');
+
+      inputTanggal.value = Utils.getTodayISO();
+      const defaultNominal = this.state.settings.defaultNominal || 100000;
+      inputNominal.value = defaultNominal.toLocaleString('id-ID');
+      selectStatus.value = 'Lunas';
+      if (searchBox) searchBox.value = '';
+
+      this.renderBulkStudentList();
+
+      selectPeriode.onchange = () => this.renderBulkStudentList();
+      if (searchBox) {
+        searchBox.oninput = () => this.renderBulkStudentList();
+      }
+
+      this.openModal('modal-bulk-pemasukan');
+    },
+
+    renderBulkStudentList() {
+      const container = document.getElementById('bulk-students-list-container');
+      const selectedPeriodId = document.getElementById('bulk-pemasukan-periode-id')?.value;
+      const searchVal = (document.getElementById('bulk-search-siswa')?.value || '').toLowerCase().trim();
+      const countEl = document.getElementById('bulk-selected-count');
+
+      if (!container || !selectedPeriodId) return;
+
+      const paymentMap = this.getValidPaymentMap();
+      let activeStudents = this.state.siswaList.filter(s => s.status === 'Aktif');
+
+      if (searchVal) {
+        activeStudents = activeStudents.filter(s => s.nama.toLowerCase().includes(searchVal));
+      }
+
+      activeStudents.sort((a, b) => a.nama.localeCompare(b.nama));
+
+      if (activeStudents.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted p-3">Tidak ada siswa ditemukan</div>';
+        if (countEl) countEl.textContent = '0';
+        return;
+      }
+
+      let html = '';
+      activeStudents.forEach((s) => {
+        const existingPay = paymentMap[`${s.id}_${selectedPeriodId}`];
+        const hasPaid = existingPay && existingPay.status === 'Lunas';
+        const currentStatus = existingPay ? existingPay.status : 'Belum Bayar';
+
+        let badgeClass = 'badge-secondary';
+        if (currentStatus === 'Lunas') badgeClass = 'badge-success';
+        if (currentStatus === 'Belum Lunas') badgeClass = 'badge-warning';
+
+        const isCheckedByDef = !hasPaid;
+
+        html += `
+          <div class="bulk-student-item mb-1">
+            <label for="chk-bulk-siswa-${s.id}">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" class="chk-bulk-siswa" id="chk-bulk-siswa-${s.id}" value="${s.id}" ${isCheckedByDef ? 'checked' : ''}>
+                <span class="font-bold">${s.nama}</span>
+              </div>
+              <span class="badge ${badgeClass}" style="font-size: 0.72rem; padding: 2px 6px;">${currentStatus}</span>
+            </label>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+
+      const updateCount = () => {
+        const checked = container.querySelectorAll('.chk-bulk-siswa:checked').length;
+        if (countEl) countEl.textContent = checked;
+      };
+
+      container.querySelectorAll('.chk-bulk-siswa').forEach(chk => chk.addEventListener('change', updateCount));
+      updateCount();
+    },
+
+    toggleBulkAllStudents() {
+      const container = document.getElementById('bulk-students-list-container');
+      const btnToggle = document.getElementById('btn-bulk-toggle-all');
+      if (!container || !btnToggle) return;
+
+      const checkboxes = container.querySelectorAll('.chk-bulk-siswa');
+      if (checkboxes.length === 0) return;
+
+      const anyUnchecked = Array.from(checkboxes).some(c => !c.checked);
+      checkboxes.forEach(c => c.checked = anyUnchecked);
+
+      btnToggle.textContent = anyUnchecked ? 'Hapus Semua' : 'Pilih Semua';
+
+      const countEl = document.getElementById('bulk-selected-count');
+      if (countEl) countEl.textContent = anyUnchecked ? checkboxes.length : 0;
+    },
+
+    async saveBulkPemasukan() {
+      const periodeId = parseInt(document.getElementById('bulk-pemasukan-periode-id').value, 10);
+      const tanggal = document.getElementById('bulk-pemasukan-tanggal').value;
+      const nominal = Utils.parseRupiah(document.getElementById('bulk-pemasukan-nominal').value);
+      const status = document.getElementById('bulk-pemasukan-status').value;
+
+      const checkedBoxes = document.querySelectorAll('#bulk-students-list-container .chk-bulk-siswa:checked');
+      const selectedSiswaIds = Array.from(checkedBoxes).map(c => parseInt(c.value, 10));
+
+      if (!periodeId || !tanggal) {
+        window.customAlert('Peringatan', 'Mohon pilih periode dan tanggal pembayaran.', 'warning');
+        return;
+      }
+
+      if (selectedSiswaIds.length === 0) {
+        window.customAlert('Peringatan', 'Pilih minimal satu siswa untuk diinput pembayarannya.', 'warning');
+        return;
+      }
+
+      const now = new Date().toISOString();
+
+      for (const siswaId of selectedSiswaIds) {
+        const existing = this.state.pemasukanList.find(
+          p => String(p.siswa_id) === String(siswaId) && String(p.periode_id) === String(periodeId)
+        );
+
+        if (existing) {
+          const item = {
+            id: existing.id,
+            siswa_id: siswaId,
+            periode_id: periodeId,
+            tanggal,
+            nominal,
+            status,
+            keterangan: existing.keterangan || 'Bulk Input',
+            updated_at: now
+          };
+          await this.db.put('pemasukan', item);
+        } else {
+          const item = {
+            siswa_id: siswaId,
+            periode_id: periodeId,
+            tanggal,
+            nominal,
+            status,
+            keterangan: 'Bulk Input',
+            created_at: now,
+            updated_at: now
+          };
+          await this.db.add('pemasukan', item);
+        }
+      }
+
+      this.state.pemasukanList = await this.db.getAll('pemasukan');
+      this.closeModal('modal-bulk-pemasukan');
+      Utils.showToast(`Berhasil menyimpan kas massal untuk ${selectedSiswaIds.length} siswa!`, 'success');
       this.renderCurrentView();
     },
 
@@ -2107,7 +2371,17 @@
       const keterangan = document.getElementById('siswa-keterangan').value.trim();
 
       if (!nama) {
-        window.customAlert('Peringatan', 'Nama siswa wajib diisi.', 'warning'); return;
+        window.customAlert('Peringatan', 'Nama siswa wajib diisi.', 'warning');
+        return;
+      }
+
+      // Check for exact duplicate student name (case-insensitive)
+      const duplicate = this.state.siswaList.find(
+        s => s.nama.toLowerCase().trim() === nama.toLowerCase() && String(s.id) !== String(siswaId)
+      );
+
+      if (duplicate) {
+        window.customAlert('Nama Sudah Terdaftar', `Siswa dengan nama "${duplicate.nama}" sudah ada dalam data. Harap gunakan nama lain atau berikan pembeda (misal: "Budi A", "Budi B").`, 'warning');
         return;
       }
 
@@ -2389,10 +2663,7 @@
         }
         periods.sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
 
-        const paymentMap = {};
-        this.state.pemasukanList.forEach((pay) => {
-          paymentMap[`${pay.siswa_id}_${pay.periode_id}`] = pay;
-        });
+        const paymentMap = this.getValidPaymentMap();
 
         const students = [...this.state.siswaList].sort((a, b) => a.nama.localeCompare(b.nama));
         const colTotals = {};
@@ -2743,10 +3014,7 @@
           }
           periods.sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
 
-          const paymentMap = {};
-          this.state.pemasukanList.forEach(p => {
-            paymentMap[`${p.siswa_id}_${p.periode_id}`] = p;
-          });
+          const paymentMap = this.getValidPaymentMap();
 
           const students = [...this.state.siswaList].sort((a, b) => a.nama.localeCompare(b.nama));
           const matrixHead = [['No', 'Nama Siswa', ...periods.map(p => p.bulan), 'Total']];
@@ -2920,8 +3188,7 @@
       if (selectedPeriodId !== 'ALL') periodsAll = periodsAll.filter(p => String(p.id) === selectedPeriodId);
       periodsAll.sort((a, b) => (a.urutan || 0) - (b.urutan || 0));
 
-      const paymentMap = {};
-      this.state.pemasukanList.forEach(pay => paymentMap[`${pay.siswa_id}_${pay.periode_id}`] = pay);
+      const paymentMap = this.getValidPaymentMap();
       const students = [...this.state.siswaList].sort((a, b) => a.nama.localeCompare(b.nama));
       const periodMap = {};
       this.state.periodeList.forEach(p => periodMap[p.id] = p.nama_periode || `${p.bulan} ${p.tahun}`);
@@ -3244,8 +3511,7 @@
         XLSX.utils.book_append_sheet(wb, wsPeriode, 'Periode');
 
         // 4. Matriks Pemasukan
-        const paymentMap = {};
-        this.state.pemasukanList.forEach(p => { paymentMap[`${p.siswa_id}_${p.periode_id}`] = p; });
+        const paymentMap = this.getValidPaymentMap();
 
         const headerRow = ['No', 'Nama Siswa', ...this.state.periodeList.map(p => `${p.bulan} ${p.tahun}`), 'Total Bayar'];
         const matrixRows = this.state.siswaList.map((s, i) => {
@@ -3292,8 +3558,7 @@
 
     async exportBackupCsv() {
       try {
-        const paymentMap = {};
-        this.state.pemasukanList.forEach(p => { paymentMap[`${p.siswa_id}_${p.periode_id}`] = p; });
+        const paymentMap = this.getValidPaymentMap();
 
         let csv = '\uFEFF';
         csv += `REKAP KAS KELAS ${this.state.settings.className}\n`;
