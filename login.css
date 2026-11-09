@@ -12,6 +12,8 @@
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   transition: opacity 0.35s ease;
 }
 
@@ -26,7 +28,11 @@
   box-shadow: 0 25px 60px rgba(0,0,0,0.35);
   width: 100%;
   max-width: 400px;
-  overflow: hidden;
+  max-height: 94vh;
+  max-height: 94dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: auto;
 }
 
 .login-card-header {

@@ -70,9 +70,19 @@
   // ==========================================
   // APP VERSION & CHANGELOG CONFIG
   // ==========================================
-  const APP_VERSION = 'v2.5.0';
-  const APP_BUILD_DATE = '03 Oktober 2026';
+  const APP_VERSION = 'v2.6.0';
+  const APP_BUILD_DATE = '09 November 2026';
   const APP_CHANGELOG = [
+    {
+      badge: 'Multi-Kelas',
+      title: 'Dukungan Kelola Banyak Kelas (Multi-Class)',
+      desc: 'Satu akun kini dapat membuat dan mengelola lebih dari 1 kelas kas secara independen. Beralih kelas secara instan lewat menu dropdown di header atau halaman Kelola Kelas.'
+    },
+    {
+      badge: 'Mobile Optimized',
+      title: 'Tampilan Form Responsif & Anti-Kepotong di HP',
+      desc: 'Seluruh form popup dan dialog modal kini mengusung mobile bottom sheet dengan area scrolling terproteksi. Tombol aksi (Simpan, Batal, Hapus) selalu terlihat dan mudah ditekan tanpa terpotong batas layar atau keyboard HP.'
+    },
     {
       badge: 'Input Kas Massal',
       title: 'Fitur Bulk Input Pemasukan Kas',
@@ -483,6 +493,17 @@
       return clean ? parseInt(clean, 10) : 0;
     },
 
+    // Escape HTML string
+    escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    },
+
     // Format ISO Date YYYY-MM-DD to DD/MM/YYYY
     formatTanggal(isoDate) {
       if (!isoDate) return '-';
@@ -662,10 +683,14 @@
 
     // Dipanggil setelah user berhasil login (dari init() atau handleAuthSubmit)
     async postLoginInit() {
+      if (this.db.initClasses) {
+        await this.db.initClasses();
+      }
       await this.loadInitialData();
       this.setupNavigation();
       this.setupEventListeners();
       this.setupRupiahInputFormatters();
+      this.renderClassSelector();
 
       // Update status indicator
       const indicator = document.getElementById('db-status-indicator');
@@ -685,12 +710,16 @@
       this.checkAppVersion();
     },
 
-    // Load data from IndexedDB into memory state
+    // Load data from database into memory state
     async loadInitialData() {
+      const currentClass = this.db.getCurrentClass ? this.db.getCurrentClass() : null;
+      const defaultClassName = currentClass?.nama || '9A AB 2';
+      const defaultAcademicYear = currentClass?.tahun_ajaran || '2026/2027';
+
       // 1. Settings
-      const isSetup = await this.db.getSetting('is_setup_completed', false);
-      const className = await this.db.getSetting('class_name', '9A AB 2');
-      const academicYear = await this.db.getSetting('academic_year', '2026/2027');
+      const isSetup = await this.db.getSetting('is_setup_completed', Boolean(currentClass));
+      const className = await this.db.getSetting('class_name', defaultClassName);
+      const academicYear = await this.db.getSetting('academic_year', defaultAcademicYear);
       const defaultNominal = await this.db.getSetting('default_nominal', 100000);
       const initialBalance = await this.db.getSetting('initial_balance', 0);
       const headerInstitution = await this.db.getSetting('header_institution', '');
@@ -775,13 +804,21 @@
     },
 
     updateHeaderInfo() {
+      const currentClass = this.db.getCurrentClass ? this.db.getCurrentClass() : null;
+      const className = this.state.settings.className || currentClass?.nama || 'Kelas';
+      const academicYear = this.state.settings.academicYear || currentClass?.tahun_ajaran || '-';
+
       const headerClass = document.getElementById('header-class-name');
       const headerYear = document.getElementById('header-academic-year');
       const sidebarBadge = document.getElementById('sidebar-class-badge');
 
-      if (headerClass) headerClass.textContent = this.state.settings.className;
-      if (headerYear) headerYear.textContent = this.state.settings.academicYear;
-      if (sidebarBadge) sidebarBadge.textContent = `${this.state.settings.className} \u2022 ${this.state.settings.academicYear}`;
+      if (headerClass) headerClass.textContent = className;
+      if (headerYear) headerYear.textContent = academicYear;
+      if (sidebarBadge) sidebarBadge.textContent = `${className} \u2022 ${academicYear}`;
+
+      if (typeof this.renderClassSelector === 'function') {
+        this.renderClassSelector();
+      }
     },
 
     // Navigation Router
@@ -841,6 +878,7 @@
         siswa: { title: 'Data Siswa', subtitle: 'Daftar nomor urut, nama, status aktif/nonaktif siswa' },
         periode: { title: 'Periode Kas', subtitle: 'Daftar bulan dan urutan kolom periode kas kelas' },
         cetak: { title: 'Cetak Laporan', subtitle: 'Ekspor laporan PDF rapi atau cetak langsung' },
+        kelas: { title: 'Kelola Kelas Kas', subtitle: 'Pilih, beralih, atau buat kelas kas baru' },
         pengaturan: { title: 'Pengaturan & Backup', subtitle: 'Konfigurasi kas, kategori, backup/restore JSON, dan import Excel' }
       };
 
@@ -875,6 +913,9 @@
           break;
         case 'cetak':
           this.renderCetakView();
+          break;
+        case 'kelas':
+          this.renderKelasView();
           break;
         case 'pengaturan':
           this.renderPengaturan();
@@ -936,6 +977,10 @@
           await this.db.setSetting('default_nominal', defaultNominal);
           await this.db.setSetting('initial_balance', initialBalance);
           await this.db.setSetting('is_setup_completed', true);
+
+          if (this.db.currentClassId && typeof this.db.updateClass === 'function') {
+            await this.db.updateClass(this.db.currentClassId, { nama: className, tahun_ajaran: academicYear });
+          }
 
           // Create default 4 periods if none exist
           if (this.state.periodeList.length === 0) {
@@ -1142,6 +1187,10 @@
           this.state.settings.headerSub = headerSub;
           this.state.settings.headerAddress = headerAddress;
 
+          if (this.db.currentClassId && typeof this.db.updateClass === 'function') {
+            await this.db.updateClass(this.db.currentClassId, { nama: className, tahun_ajaran: academicYear });
+          }
+
           this.updateHeaderInfo();
           Utils.showToast('Data berhasil diperbarui.', 'success');
           this.renderCurrentView();
@@ -1319,18 +1368,22 @@
       }
 
       // 12. Logout button
-      const btnLogout = document.getElementById('btn-user-logout');
-      if (btnLogout) {
-        btnLogout.addEventListener('click', async () => {
-          window.customConfirm('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar?', 'danger').then(async (confirmed) => {
-              if (confirmed) {
-                await this.db.logout();
-                Utils.showToast('Berhasil keluar.', 'info');
-                setTimeout(() => location.reload(), 800);
-              }
-            })
+      const handleLogout = () => {
+        window.customConfirm('Konfirmasi Keluar', 'Apakah Anda yakin ingin keluar?', 'danger').then(async (confirmed) => {
+          if (confirmed) {
+            await this.db.logout();
+            Utils.showToast('Berhasil keluar.', 'info');
+            setTimeout(() => location.reload(), 800);
+          }
         });
-      }
+      };
+      const btnLogout = document.getElementById('btn-user-logout');
+      if (btnLogout) btnLogout.addEventListener('click', handleLogout);
+      const btnSidebarLogout = document.getElementById('btn-sidebar-logout');
+      if (btnSidebarLogout) btnSidebarLogout.addEventListener('click', handleLogout);
+
+      // 13. Class management & switcher events
+      this.setupClassEvents();
     },
 
     // Auto Rupiah live input formatter
@@ -3433,8 +3486,328 @@
     },
 
     // ==========================================
-    // 13. BACKUP & RESTORE (JSON)
+    // 12. MULTI-CLASS MANAGEMENT & SWITCHING
     // ==========================================
+    renderClassSelector() {
+      const classes = this.db.getClasses ? this.db.getClasses() : [];
+      const currentClass = this.db.getCurrentClass ? this.db.getCurrentClass() : null;
+
+      const className = currentClass?.nama || this.state.settings.className || 'Pilih Kelas';
+      const academicYear = currentClass?.tahun_ajaran || this.state.settings.academicYear || '-';
+
+      const headerClass = document.getElementById('header-class-name');
+      const headerYear = document.getElementById('header-academic-year');
+      const sidebarBadge = document.getElementById('sidebar-class-badge');
+
+      if (headerClass) headerClass.textContent = className;
+      if (headerYear) headerYear.textContent = academicYear;
+      if (sidebarBadge) sidebarBadge.textContent = `${className} \u2022 ${academicYear}`;
+
+      const countBadge = document.getElementById('class-dropdown-count');
+      if (countBadge) countBadge.textContent = `${classes.length} Kelas`;
+
+      const listEl = document.getElementById('class-dropdown-list');
+      if (listEl) {
+        if (classes.length === 0) {
+          listEl.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.82rem;">Belum ada kelas</div>';
+        } else {
+          listEl.innerHTML = classes.map(c => {
+            const isActive = c.id === this.db.currentClassId;
+            return `
+              <div class="class-dropdown-item ${isActive ? 'active' : ''}" data-class-id="${c.id}" role="button" tabindex="0">
+                <div class="class-item-left">
+                  <span class="class-item-name">${Utils.escapeHtml(c.nama || 'Kelas')}</span>
+                  <span class="class-item-year">${Utils.escapeHtml(c.tahun_ajaran || '')}</span>
+                </div>
+                ${isActive ? '<span class="class-item-badge">Aktif</span>' : ''}
+              </div>
+            `;
+          }).join('');
+
+          listEl.querySelectorAll('.class-dropdown-item').forEach(item => {
+            item.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              const classId = item.getAttribute('data-class-id');
+              const menu = document.getElementById('class-dropdown-menu');
+              const wrapper = document.getElementById('class-selector-wrapper');
+              if (menu) menu.classList.add('hidden');
+              if (wrapper) wrapper.classList.remove('open');
+
+              if (classId && classId !== this.db.currentClassId) {
+                await this.handleSwitchClass(classId);
+              }
+            });
+          });
+        }
+      }
+    },
+
+    renderKelasView() {
+      const container = document.getElementById('kelas-grid-container');
+      if (!container) return;
+
+      const classes = this.db.getClasses ? this.db.getClasses() : [];
+      if (classes.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem 1rem; color: var(--text-muted);">
+            <p style="font-size: 0.95rem; margin-bottom: 0.75rem;">Belum ada data kelas kas.</p>
+            <p style="font-size: 0.82rem;">Klik tombol "+ Tambah Kelas Baru" di atas untuk membuat kelas pertama Anda.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = classes.map(cls => {
+        const isActive = cls.id === this.db.currentClassId;
+        return `
+          <div class="kelas-card ${isActive ? 'active-class' : ''}">
+            <div class="kelas-card-header">
+              <div>
+                <div class="kelas-card-title">${Utils.escapeHtml(cls.nama || 'Tanpa Nama')}</div>
+                <div class="kelas-card-year">Tahun Ajaran: ${Utils.escapeHtml(cls.tahun_ajaran || '-')}</div>
+              </div>
+              ${isActive ? '<span class="badge badge-success">Kelas Aktif</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Tidak Aktif</span>'}
+            </div>
+            <div class="kelas-card-stats">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>${isActive ? `${this.state.siswaList.length} Siswa terdaftar` : 'Data kas tersimpan'}</span>
+            </div>
+            <div class="kelas-card-actions">
+              ${isActive 
+                ? '<button type="button" class="btn btn-sm btn-outline" disabled style="opacity:0.85; cursor:default; font-weight:600;">✓ Sedang Dibuka</button>'
+                : `<button type="button" class="btn btn-sm btn-primary btn-switch-kelas" data-class-id="${cls.id}">Beralih ke Kelas Ini</button>`
+              }
+              <button type="button" class="btn btn-sm btn-secondary btn-edit-kelas" data-class-id="${cls.id}" data-nama="${Utils.escapeHtml(cls.nama)}" data-tahun="${Utils.escapeHtml(cls.tahun_ajaran)}">Edit</button>
+              ${classes.length > 1 ? `<button type="button" class="btn btn-sm btn-danger btn-hapus-kelas" data-class-id="${cls.id}" data-nama="${Utils.escapeHtml(cls.nama)}">Hapus</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    },
+
+    async handleSwitchClass(classId) {
+      try {
+        const target = await this.db.switchClass(classId);
+        await this.loadInitialData();
+        this.renderClassSelector();
+        this.renderCurrentView();
+        Utils.showToast(`Berhasil beralih ke kelas ${target.nama}!`, 'success');
+      } catch (err) {
+        console.error('Error switching class:', err);
+        Utils.showToast('Gagal beralih kelas: ' + err.message, 'danger');
+      }
+    },
+
+    async handleDeleteClass(classId, className) {
+      window.customConfirm(
+        'Hapus Kelas Kas',
+        `Apakah Anda yakin ingin menghapus kelas "${className}" beserta seluruh data transaksi dan siswanya? Tindakan ini tidak dapat dibatalkan!`,
+        'danger'
+      ).then(async (confirmed) => {
+        if (!confirmed) return;
+        try {
+          const nextClassId = await this.db.deleteClass(classId);
+          if (nextClassId) {
+            await this.loadInitialData();
+          }
+          this.renderClassSelector();
+          this.renderCurrentView();
+          Utils.showToast(`Kelas "${className}" berhasil dihapus.`, 'success');
+        } catch (err) {
+          console.error('Error deleting class:', err);
+          Utils.showToast('Gagal menghapus kelas: ' + err.message, 'danger');
+        }
+      });
+    },
+
+    setupClassEvents() {
+      const btnSelector = document.getElementById('btn-class-selector');
+      const wrapper = document.getElementById('class-selector-wrapper');
+      const menu = document.getElementById('class-dropdown-menu');
+
+      if (btnSelector && menu && wrapper) {
+        btnSelector.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isHidden = menu.classList.contains('hidden');
+          if (isHidden) {
+            menu.classList.remove('hidden');
+            wrapper.classList.add('open');
+            btnSelector.setAttribute('aria-expanded', 'true');
+          } else {
+            menu.classList.add('hidden');
+            wrapper.classList.remove('open');
+            btnSelector.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!wrapper.contains(e.target)) {
+            menu.classList.add('hidden');
+            wrapper.classList.remove('open');
+            btnSelector.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+
+      // Open modal tambah kelas from dropdown or view
+      const btnDropdownTambah = document.getElementById('btn-dropdown-tambah-kelas');
+      const btnViewTambah = document.getElementById('btn-tambah-kelas-view');
+
+      const openTambahKelasModal = () => {
+        if (menu && wrapper) {
+          menu.classList.add('hidden');
+          wrapper.classList.remove('open');
+        }
+        const form = document.getElementById('form-tambah-kelas');
+        if (form) form.reset();
+        const curYear = new Date().getFullYear();
+        const inputTahun = document.getElementById('input-tambah-kelas-tahun');
+        if (inputTahun && !inputTahun.value) {
+          inputTahun.value = `${curYear}/${curYear + 1}`;
+        }
+        const inputNominal = document.getElementById('input-tambah-kelas-nominal');
+        if (inputNominal && !inputNominal.value) {
+          inputNominal.value = '100.000';
+        }
+        this.openModal('modal-tambah-kelas');
+      };
+
+      if (btnDropdownTambah) btnDropdownTambah.addEventListener('click', openTambahKelasModal);
+      if (btnViewTambah) btnViewTambah.addEventListener('click', openTambahKelasModal);
+
+      // Form Tambah Kelas
+      const formTambahKelas = document.getElementById('form-tambah-kelas');
+      if (formTambahKelas) {
+        formTambahKelas.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const nama = document.getElementById('input-tambah-kelas-nama')?.value.trim();
+          const tahun = document.getElementById('input-tambah-kelas-tahun')?.value.trim();
+          const nominal = Utils.parseRupiah(document.getElementById('input-tambah-kelas-nominal')?.value || '100000');
+          const saldo = Utils.parseRupiah(document.getElementById('input-tambah-kelas-saldo')?.value || '0');
+          const defaultPeriods = document.getElementById('input-tambah-kelas-periode')?.checked ?? true;
+
+          if (!nama || !tahun) {
+            Utils.showToast('Nama kelas dan tahun ajaran wajib diisi!', 'warning');
+            return;
+          }
+
+          const btnSubmit = document.getElementById('btn-submit-tambah-kelas');
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Menyimpan...';
+          }
+
+          try {
+            const newClassId = await this.db.addClass({
+              nama,
+              tahun_ajaran: tahun,
+              default_nominal: nominal,
+              initial_balance: saldo,
+              default_categories: true,
+              default_periods: defaultPeriods
+            });
+
+            await this.db.switchClass(newClassId);
+            await this.loadInitialData();
+            this.closeModal('modal-tambah-kelas');
+            formTambahKelas.reset();
+            this.renderClassSelector();
+            this.renderCurrentView();
+            Utils.showToast(`Kelas "${nama}" berhasil dibuat & aktif!`, 'success');
+          } catch (err) {
+            console.error('Error adding class:', err);
+            Utils.showToast('Gagal menambah kelas: ' + err.message, 'danger');
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.textContent = 'Simpan & Beralih ke Kelas Ini';
+            }
+          }
+        });
+      }
+
+      // Form Edit Kelas
+      const formEditKelas = document.getElementById('form-edit-kelas');
+      if (formEditKelas) {
+        formEditKelas.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const classId = document.getElementById('edit-kelas-id')?.value;
+          const nama = document.getElementById('edit-kelas-nama')?.value.trim();
+          const tahun = document.getElementById('edit-kelas-tahun')?.value.trim();
+
+          if (!nama || !tahun) {
+            Utils.showToast('Nama kelas dan tahun ajaran wajib diisi!', 'warning');
+            return;
+          }
+
+          const btnSubmit = document.getElementById('btn-submit-edit-kelas');
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = 'Menyimpan...';
+          }
+
+          try {
+            await this.db.updateClass(classId, { nama, tahun_ajaran: tahun });
+            if (this.db.currentClassId === classId) {
+              this.state.settings.className = nama;
+              this.state.settings.academicYear = tahun;
+              this.updateHeaderInfo();
+            }
+            this.closeModal('modal-edit-kelas');
+            this.renderClassSelector();
+            this.renderCurrentView();
+            Utils.showToast('Informasi kelas berhasil diperbarui!', 'success');
+          } catch (err) {
+            console.error('Error updating class:', err);
+            Utils.showToast('Gagal mengubah kelas: ' + err.message, 'danger');
+          } finally {
+            if (btnSubmit) {
+              btnSubmit.disabled = false;
+              btnSubmit.textContent = 'Simpan Perubahan';
+            }
+          }
+        });
+      }
+
+      // Event delegation on kelas-grid-container
+      const gridContainer = document.getElementById('kelas-grid-container');
+      if (gridContainer) {
+        gridContainer.addEventListener('click', async (e) => {
+          const switchBtn = e.target.closest('.btn-switch-kelas');
+          if (switchBtn) {
+            const classId = switchBtn.getAttribute('data-class-id');
+            if (classId) await this.handleSwitchClass(classId);
+            return;
+          }
+
+          const editBtn = e.target.closest('.btn-edit-kelas');
+          if (editBtn) {
+            const classId = editBtn.getAttribute('data-class-id');
+            const nama = editBtn.getAttribute('data-nama') || '';
+            const tahun = editBtn.getAttribute('data-tahun') || '';
+
+            const idInput = document.getElementById('edit-kelas-id');
+            const namaInput = document.getElementById('edit-kelas-nama');
+            const tahunInput = document.getElementById('edit-kelas-tahun');
+
+            if (idInput) idInput.value = classId;
+            if (namaInput) namaInput.value = nama;
+            if (tahunInput) tahunInput.value = tahun;
+
+            this.openModal('modal-edit-kelas');
+            return;
+          }
+
+          const hapusBtn = e.target.closest('.btn-hapus-kelas');
+          if (hapusBtn) {
+            const classId = hapusBtn.getAttribute('data-class-id');
+            const nama = hapusBtn.getAttribute('data-nama') || 'Kelas';
+            await this.handleDeleteClass(classId, nama);
+            return;
+          }
+        });
+      }
+    },
     async exportBackupJson() {
       try {
         const backupData = {
